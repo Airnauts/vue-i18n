@@ -207,11 +207,11 @@ function extend (Vue) {
   };
 }
 
-var this$1$1 = undefined;
+/*  */
 var onDestroy = function ( self ) {
   if (!self._i18n) { return }
 
-  this$1$1.$nextTick(function () {
+  self.$nextTick(function () {
     if (self._subscribing) {
       self._i18n.unsubscribeDataChanging(self);
       delete self._subscribing;

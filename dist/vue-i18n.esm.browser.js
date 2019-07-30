@@ -187,7 +187,7 @@ function extend (Vue) {
 const onDestroy = ( self ) => {
   if (!self._i18n) { return }
 
-  undefined.$nextTick(() => {
+  self.$nextTick(() => {
     if (self._subscribing) {
       self._i18n.unsubscribeDataChanging(self);
       delete self._subscribing;

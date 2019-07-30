@@ -5,7 +5,7 @@ import { isPlainObject, warn, merge } from './util'
 const onDestroy = ( self ) => {
   if (!self._i18n) { return }
 
-  this.$nextTick(() => {
+  self.$nextTick(() => {
     if (self._subscribing) {
       self._i18n.unsubscribeDataChanging(self)
       delete self._subscribing
