@@ -2,9 +2,36 @@
 
 import VueI18n from './index'
 import { isPlainObject, warn, merge } from './util'
+const onDestroy = ( self ) => {
+  if (!self._i18n) { return }
 
+  this.$nextTick(() => {
+    if (self._subscribing) {
+      self._i18n.unsubscribeDataChanging(self)
+      delete self._subscribing
+    }
+
+    if (self._i18nWatcher) {
+      self._i18nWatcher()
+      self._i18n.destroyVM()
+      delete self._i18nWatcher
+    }
+
+    if (self._localeWatcher) {
+      self._localeWatcher()
+      delete self._localeWatcher
+    }
+
+    self._i18n = null
+  })
+}
 export default {
+  
+
   beforeCreate (): void {
+    if ( this.$isServer ) {
+      onDestroy( this )
+    }
     const options: any = this.$options
     options.i18n = options.i18n || (options.__i18n ? {} : null)
 
@@ -107,27 +134,6 @@ export default {
   },
 
   beforeDestroy (): void {
-    if (!this._i18n) { return }
-
-    const self = this
-    this.$nextTick(() => {
-      if (self._subscribing) {
-        self._i18n.unsubscribeDataChanging(self)
-        delete self._subscribing
-      }
-
-      if (self._i18nWatcher) {
-        self._i18nWatcher()
-        self._i18n.destroyVM()
-        delete self._i18nWatcher
-      }
-
-      if (self._localeWatcher) {
-        self._localeWatcher()
-        delete self._localeWatcher
-      }
-
-      self._i18n = null
-    })
+    onDestroy( this )
   }
 }

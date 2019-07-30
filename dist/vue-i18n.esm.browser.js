@@ -184,9 +184,36 @@ function extend (Vue) {
 }
 
 /*  */
+const onDestroy = ( self ) => {
+  if (!self._i18n) { return }
 
+  undefined.$nextTick(() => {
+    if (self._subscribing) {
+      self._i18n.unsubscribeDataChanging(self);
+      delete self._subscribing;
+    }
+
+    if (self._i18nWatcher) {
+      self._i18nWatcher();
+      self._i18n.destroyVM();
+      delete self._i18nWatcher;
+    }
+
+    if (self._localeWatcher) {
+      self._localeWatcher();
+      delete self._localeWatcher;
+    }
+
+    self._i18n = null;
+  });
+};
 var mixin = {
+  
+
   beforeCreate () {
+    if ( this.$isServer ) {
+      onDestroy( this );
+    }
     const options = this.$options;
     options.i18n = options.i18n || (options.__i18n ? {} : null);
 
@@ -289,28 +316,7 @@ var mixin = {
   },
 
   beforeDestroy () {
-    if (!this._i18n) { return }
-
-    const self = this;
-    this.$nextTick(() => {
-      if (self._subscribing) {
-        self._i18n.unsubscribeDataChanging(self);
-        delete self._subscribing;
-      }
-
-      if (self._i18nWatcher) {
-        self._i18nWatcher();
-        self._i18n.destroyVM();
-        delete self._i18nWatcher;
-      }
-
-      if (self._localeWatcher) {
-        self._localeWatcher();
-        delete self._localeWatcher;
-      }
-
-      self._i18n = null;
-    });
+    onDestroy( this );
   }
 };
 

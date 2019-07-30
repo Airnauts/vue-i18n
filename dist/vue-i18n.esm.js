@@ -207,10 +207,37 @@ function extend (Vue) {
   };
 }
 
-/*  */
+var this$1$1 = undefined;
+var onDestroy = function ( self ) {
+  if (!self._i18n) { return }
 
+  this$1$1.$nextTick(function () {
+    if (self._subscribing) {
+      self._i18n.unsubscribeDataChanging(self);
+      delete self._subscribing;
+    }
+
+    if (self._i18nWatcher) {
+      self._i18nWatcher();
+      self._i18n.destroyVM();
+      delete self._i18nWatcher;
+    }
+
+    if (self._localeWatcher) {
+      self._localeWatcher();
+      delete self._localeWatcher;
+    }
+
+    self._i18n = null;
+  });
+};
 var mixin = {
+  
+
   beforeCreate: function beforeCreate () {
+    if ( this.$isServer ) {
+      onDestroy( this );
+    }
     var options = this.$options;
     options.i18n = options.i18n || (options.__i18n ? {} : null);
 
@@ -314,28 +341,7 @@ var mixin = {
   },
 
   beforeDestroy: function beforeDestroy () {
-    if (!this._i18n) { return }
-
-    var self = this;
-    this.$nextTick(function () {
-      if (self._subscribing) {
-        self._i18n.unsubscribeDataChanging(self);
-        delete self._subscribing;
-      }
-
-      if (self._i18nWatcher) {
-        self._i18nWatcher();
-        self._i18n.destroyVM();
-        delete self._i18nWatcher;
-      }
-
-      if (self._localeWatcher) {
-        self._localeWatcher();
-        delete self._localeWatcher;
-      }
-
-      self._i18n = null;
-    });
+    onDestroy( this );
   }
 };
 
